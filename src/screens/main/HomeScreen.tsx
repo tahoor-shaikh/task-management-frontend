@@ -112,7 +112,9 @@ export default function HomeScreen({ navigation }: MainScreenProps<"Home">) {
 		<Card style={styles.taskCard}>
 			<Card.Content style={styles.taskContent}>
 				<View style={{ flex: 1 }}>
-					<Text variant="titleMedium">{item.title}</Text>
+					<Text variant="titleMedium" numberOfLines={1}>
+						{item.title}
+					</Text>
 					<Text variant="bodyMedium" numberOfLines={2}>
 						{item.description}
 					</Text>
