@@ -10,6 +10,8 @@ import { SignupData } from "../../types";
 
 import { signUpUser } from "../../controllers/AuthController";
 
+import { SCREENS } from "../../navigation/screens";
+
 export default function SignupScreen({
 	navigation,
 }: AuthScreenProps<"Signup">) {
@@ -92,7 +94,7 @@ export default function SignupScreen({
 			>
 				Sign Up
 			</Button>
-			<Button onPress={() => navigation.navigate("Login")}>
+			<Button onPress={() => navigation.navigate(SCREENS.LOGIN)}>
 				Already have an account? Login
 			</Button>
 		</View>

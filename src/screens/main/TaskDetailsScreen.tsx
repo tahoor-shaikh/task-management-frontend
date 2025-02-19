@@ -1,55 +1,98 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet } from "react-native";
-import { Button, TextInput, ActivityIndicator } from "react-native-paper";
-import { useAppDispatch, useAppSelector } from "../../store";
-import { updateTask, deleteTask } from "../../store/tasks/taskSlice";
+import { Button, TextInput, ActivityIndicator, Text } from "react-native-paper";
+
 import { MainScreenProps } from "../../navigation/types";
+
+import {
+	getTask,
+	updateTask,
+	deleteTask,
+} from "../../controllers/TasksController";
+
+import { Task } from "../../types";
+
+import { toast } from "../../utils/toast";
 
 export default function TaskDetailsScreen({
 	navigation,
 	route,
 }: MainScreenProps<"TaskDetails">) {
-	const dispatch = useAppDispatch();
 	const { taskId } = route.params;
-
-	const task = useAppSelector((state) =>
-		state.tasks.tasks.find((t) => t.id === taskId)
-	);
-
+	const [task, setTask] = useState<Task | null>(null);
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
+	const [loading, setLoading] = useState(true);
+	const [updating, setUpdating] = useState(false);
+	const [deleting, setDeleting] = useState(false);
 
 	useEffect(() => {
-		if (task) {
-			setTitle(task.title);
-			setDescription(task.description);
-		}
-	}, [task]);
+		getScreenData();
+	}, [taskId]);
 
-	const handleUpdateTask = () => {
-		if (taskId && title.trim()) {
-			dispatch(
-				updateTask({
-					id: taskId,
-					title: title.trim(),
-					description: description.trim(),
-				})
-			);
-			navigation.goBack();
+	const getScreenData = async () => {
+		await fetchTask();
+	};
+
+	const fetchTask = async () => {
+		try {
+			const response = await getTask(taskId);
+			const fetchedTask = response;
+			setTask(fetchedTask);
+			setTitle(fetchedTask.title);
+			setDescription(fetchedTask.description);
+		} catch (error: any) {
+			console.log("Failed to fetch task:", error);
+
+			toast.error(error.message);
+		} finally {
+			setLoading(false);
 		}
 	};
 
-	const handleDeleteTask = () => {
-		if (taskId) {
-			dispatch(deleteTask(taskId));
+	const handleUpdateTask = async () => {
+		if (!task || !title.trim() || updating) return;
+
+		setUpdating(true);
+		try {
+			await updateTask(taskId, {
+				title: title.trim(),
+				description: description.trim(),
+				completed: task.completed,
+			});
 			navigation.goBack();
+		} catch (error) {
+			console.log("Failed to update task:", error);
+			setUpdating(false);
 		}
 	};
+
+	const handleDeleteTask = async () => {
+		if (!taskId || updating) return;
+
+		setDeleting(true);
+		try {
+			await deleteTask(taskId);
+			navigation.goBack();
+		} catch (error) {
+			console.log("Failed to delete task:", error);
+		} finally {
+			setUpdating(false);
+		}
+	};
+
+	if (loading) {
+		return (
+			<View style={[styles.container, styles.centered]}>
+				<ActivityIndicator size="large" />
+			</View>
+		);
+	}
 
 	if (!task) {
 		return (
-			<View style={styles.container}>
-				<ActivityIndicator size="large" />
+			<View style={[styles.container, styles.centered]}>
+				<Text>Task not found</Text>
 			</View>
 		);
 	}
@@ -73,9 +116,10 @@ export default function TaskDetailsScreen({
 			<View style={styles.buttonContainer}>
 				<Button
 					mode="contained"
+					loading={updating}
 					onPress={handleUpdateTask}
 					style={[styles.button, styles.updateButton]}
-					disabled={!title.trim()}
+					disabled={!title.trim() || updating || deleting}
 				>
 					Update Task
 				</Button>
@@ -84,6 +128,8 @@ export default function TaskDetailsScreen({
 					onPress={handleDeleteTask}
 					style={[styles.button, styles.deleteButton]}
 					buttonColor="red"
+					loading={deleting}
+					disabled={updating || deleting}
 				>
 					Delete Task
 				</Button>
@@ -96,6 +142,10 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		padding: 16,
+	},
+	centered: {
+		justifyContent: "center",
+		alignItems: "center",
 	},
 	input: {
 		marginBottom: 16,

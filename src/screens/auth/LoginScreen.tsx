@@ -13,6 +13,8 @@ import { storeAuthData } from "../../store/auth/authSlice";
 import { toast } from "../../utils/toast";
 import { validateLoginForm } from "../../utils/validation";
 
+import { SCREENS } from "../../navigation/screens";
+
 export default function LoginScreen({ navigation }: AuthScreenProps<"Login">) {
 	const dispatch = useAppDispatch();
 	const [formData, setFormData] = useState<LoginPayload>({
@@ -81,7 +83,7 @@ export default function LoginScreen({ navigation }: AuthScreenProps<"Login">) {
 			>
 				Login
 			</Button>
-			<Button onPress={() => navigation.navigate("Signup")}>
+			<Button onPress={() => navigation.navigate(SCREENS.SIGNUP)}>
 				Don't have an account? Sign up
 			</Button>
 		</View>

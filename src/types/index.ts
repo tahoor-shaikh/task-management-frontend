@@ -1,10 +1,8 @@
 export interface Task {
-	id: string;
+	_id: string;
 	title: string;
 	description: string;
 	completed: boolean;
-	createdAt: string;
-	updatedAt: string;
 }
 
 export interface User {
@@ -36,4 +34,16 @@ export interface SignupData {
 	username: string;
 	email: string;
 	password: string;
+}
+
+export interface CreateTaskPayload {
+	title: string;
+	description: string;
+	completed: boolean;
+}
+
+export interface UpdateTaskPayload {
+	title?: string;
+	description?: string;
+	completed?: boolean;
 }

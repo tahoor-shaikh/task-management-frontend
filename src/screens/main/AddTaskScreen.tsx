@@ -1,23 +1,34 @@
 import React, { useState } from "react";
 import { View, StyleSheet } from "react-native";
 import { Button, TextInput } from "react-native-paper";
-import { useAppDispatch } from "../../store";
-import { addTask } from "../../store/tasks/taskSlice";
+
+import { createTask } from "../../controllers/TasksController";
+
 import { MainScreenProps } from "../../navigation/types";
 
 export default function AddTaskScreen({
 	navigation,
 }: MainScreenProps<"AddTask">) {
-	const dispatch = useAppDispatch();
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
+	const [loading, setLoading] = useState(false);
 
-	const handleAddTask = () => {
-		if (title.trim()) {
-			dispatch(
-				addTask({ title: title.trim(), description: description.trim() })
-			);
-			navigation.goBack();
+	const handleAddTask = async () => {
+		if (title.trim() && !loading) {
+			setLoading(true);
+			try {
+				const response = await createTask({
+					title: title.trim(),
+					description: description.trim(),
+					completed: false,
+				});
+
+				navigation.goBack();
+			} catch (error) {
+				console.log("Failed to create task:", error);
+			} finally {
+				setLoading(false);
+			}
 		}
 	};
 
@@ -42,7 +53,8 @@ export default function AddTaskScreen({
 				mode="contained"
 				onPress={handleAddTask}
 				style={styles.button}
-				disabled={!title.trim()}
+				disabled={!title.trim() || loading}
+				loading={loading}
 			>
 				Add Task
 			</Button>

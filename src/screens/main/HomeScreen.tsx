@@ -1,18 +1,111 @@
-import React from "react";
-import { View, StyleSheet, FlatList } from "react-native";
+import React, { useCallback, useState } from "react";
+import {
+	View,
+	StyleSheet,
+	FlatList,
+	ActivityIndicator,
+	RefreshControl,
+} from "react-native";
 import { Button, Card, IconButton, Text } from "react-native-paper";
-import { useAppDispatch, useAppSelector } from "../../store";
-import { toggleComplete, deleteTask } from "../../store/tasks/taskSlice";
+import { useFocusEffect } from "@react-navigation/native";
+
+import {
+	getTasks,
+	deleteTask,
+	updateTask,
+} from "../../controllers/TasksController";
+
 import { MainScreenProps } from "../../navigation/types";
 import { Task } from "../../types";
+
+import { useAppDispatch } from "../../store";
 import { storeAuthData } from "../../store/auth/authSlice";
+
+import { toast } from "../../utils/toast";
+
+import { SCREENS } from "../../navigation/screens";
 
 export default function HomeScreen({ navigation }: MainScreenProps<"Home">) {
 	const dispatch = useAppDispatch();
-	const tasks = useAppSelector((state) => state.tasks.tasks);
+
+	const [tasks, setTasks] = useState<Task[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [refreshing, setRefreshing] = useState(false);
+
+	useFocusEffect(
+		useCallback(() => {
+			getScreenData();
+		}, [])
+	);
+
+	const getScreenData = async () => {
+		await fetchTasks();
+	};
+
+	const onRefresh = async () => {
+		setRefreshing(true);
+		await fetchTasks();
+		setRefreshing(false);
+	};
+
+	const fetchTasks = async () => {
+		try {
+			const response = await getTasks();
+			setTasks(response);
+		} catch (error: any) {
+			console.log("Failed to fetch tasks:", error);
+			toast.error(error.message);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	const handleLogout = () => {
-		dispatch(storeAuthData({ user: null, token: null }));
+		dispatch(
+			storeAuthData({
+				token: null,
+			})
+		);
+	};
+
+	const handleUpdateTask = async (item: Task) => {
+		const oldStatus = item.completed;
+		try {
+			setTasks((prev) =>
+				prev.map((task) =>
+					task._id === item._id ? { ...task, completed: !task.completed } : task
+				)
+			);
+
+			await updateTask(item._id, {
+				...item,
+				completed: !item.completed,
+			});
+		} catch (error: any) {
+			console.log("Failed to update task:", error);
+			toast.error(error.message);
+
+			setTasks((prev) =>
+				prev.map((task) =>
+					task._id === item._id ? { ...task, completed: oldStatus } : task
+				)
+			);
+		}
+	};
+
+	const handleDeleteTask = async (task: Task) => {
+		try {
+			const taskId = task._id;
+			setTasks((prev) => prev.filter((t) => t._id !== taskId));
+
+			await deleteTask(taskId);
+		} catch (error: any) {
+			console.log("Failed to delete task:", error);
+
+			fetchTasks();
+
+			toast.error(error.message);
+		}
 	};
 
 	const renderTask = ({ item }: { item: Task }) => (
@@ -27,22 +120,27 @@ export default function HomeScreen({ navigation }: MainScreenProps<"Home">) {
 				<View style={styles.taskActions}>
 					<IconButton
 						icon={item.completed ? "check-circle" : "circle-outline"}
-						onPress={() => dispatch(toggleComplete(item.id))}
+						onPress={() => handleUpdateTask(item)}
 					/>
 					<IconButton
 						icon="pencil"
 						onPress={() =>
-							navigation.navigate("TaskDetails", { taskId: item.id })
+							navigation.navigate(SCREENS.TASK_DETAILS, { taskId: item._id })
 						}
 					/>
-					<IconButton
-						icon="delete"
-						onPress={() => dispatch(deleteTask(item.id))}
-					/>
+					<IconButton icon="delete" onPress={() => handleDeleteTask(item)} />
 				</View>
 			</Card.Content>
 		</Card>
 	);
+
+	if (loading) {
+		return (
+			<View style={[styles.container, styles.centered]}>
+				<ActivityIndicator size="large" />
+			</View>
+		);
+	}
 
 	return (
 		<View style={styles.container}>
@@ -54,8 +152,15 @@ export default function HomeScreen({ navigation }: MainScreenProps<"Home">) {
 			<FlatList
 				data={tasks}
 				renderItem={renderTask}
-				keyExtractor={(item) => item.id}
+				keyExtractor={(item) => item._id}
 				contentContainerStyle={styles.taskList}
+				refreshControl={
+					<RefreshControl
+						colors={["#6200EE"]}
+						refreshing={refreshing}
+						onRefresh={onRefresh}
+					/>
+				}
 				ListEmptyComponent={
 					<Text style={styles.emptyText}>
 						No tasks yet. Add your first task!
@@ -65,7 +170,7 @@ export default function HomeScreen({ navigation }: MainScreenProps<"Home">) {
 
 			<Button
 				mode="contained"
-				onPress={() => navigation.navigate("AddTask")}
+				onPress={() => navigation.navigate(SCREENS.ADD_TASK)}
 				style={styles.addButton}
 			>
 				Add New Task
@@ -80,6 +185,10 @@ const styles = StyleSheet.create({
 		padding: 16,
 		marginTop: 16,
 	},
+	centered: {
+		justifyContent: "center",
+		alignItems: "center",
+	},
 	header: {
 		flexDirection: "row",
 		justifyContent: "space-between",
@@ -90,7 +199,9 @@ const styles = StyleSheet.create({
 		flexGrow: 1,
 	},
 	taskCard: {
-		marginBottom: 8,
+		marginBottom: 4,
+		marginHorizontal: 4,
+		marginTop: 4,
 	},
 	taskContent: {
 		flexDirection: "row",
