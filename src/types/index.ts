@@ -47,3 +47,8 @@ export interface UpdateTaskPayload {
 	description?: string;
 	completed?: boolean;
 }
+
+export interface ChangePasswordPayload {
+	oldPassword: string;
+	newPassword: string;
+}

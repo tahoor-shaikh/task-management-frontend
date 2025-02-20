@@ -2,6 +2,7 @@ export const END_POINTS = {
 	// Auth
 	SIGNUP: "auth/signup",
 	LOGIN: "auth/login",
+	CHANGE_PASSWORD: "auth/change-password",
 
 	// Tasks
 	CREATE_TASK: "tasks",

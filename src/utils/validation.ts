@@ -80,3 +80,28 @@ export const validateSignupForm = (data: {
 
 	return { isValid: true };
 };
+
+
+
+export const validateChangePasswordForm = (data: {
+	oldPassword: string;
+	newPassword: string;
+	confirmPassword: string;
+}) => {
+	const oldPasswordValidation = validatePassword(data.oldPassword);
+	if (!oldPasswordValidation.isValid) {
+		return oldPasswordValidation;
+	}
+
+	const newPasswordValidation = validatePassword(data.newPassword);
+	if (!newPasswordValidation.isValid) {
+		return newPasswordValidation;
+	}
+
+	if (data.newPassword !== data.confirmPassword) {
+		return { isValid: false, message: "Passwords do not match" };
+	}
+
+	return { isValid: true };
+}
+

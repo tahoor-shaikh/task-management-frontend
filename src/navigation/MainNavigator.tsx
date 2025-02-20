@@ -8,27 +8,33 @@ import { MainStackParamList } from "./types";
 import HomeScreen from "../screens/main/HomeScreen";
 import AddTaskScreen from "../screens/main/AddTaskScreen";
 import TaskDetailsScreen from "../screens/main/TaskDetailsScreen";
+import ChangePassword from "../screens/main/ChangePasswordScreen";
 
 const MainStack = createNativeStackNavigator<MainStackParamList>();
 
 export const MainNavigator = () => {
-	return (
-		<MainStack.Navigator>
-			<MainStack.Screen
-				name={SCREENS.HOME}
-				component={HomeScreen}
-				options={{ headerShown: false }}
-			/>
-			<MainStack.Screen
-				name={SCREENS.ADD_TASK}
-				component={AddTaskScreen}
-				options={{ title: "Add Task" }}
-			/>
-			<MainStack.Screen
-				name={SCREENS.TASK_DETAILS}
-				component={TaskDetailsScreen}
-				options={{ title: "Task Details" }}
-			/>
-		</MainStack.Navigator>
-	);
+  return (
+    <MainStack.Navigator>
+      <MainStack.Screen
+        name={SCREENS.HOME}
+        component={HomeScreen}
+        options={{ headerShown: false }}
+      />
+      <MainStack.Screen
+        name={SCREENS.ADD_TASK}
+        component={AddTaskScreen}
+        options={{ title: "Add Task" }}
+      />
+      <MainStack.Screen
+        name={SCREENS.TASK_DETAILS}
+        component={TaskDetailsScreen}
+        options={{ title: "Task Details" }}
+      />
+      <MainStack.Screen
+        name={SCREENS.CHANGE_PASSWORD}
+        component={ChangePassword}
+        options={{ headerShown: false }}
+      />
+    </MainStack.Navigator>
+  );
 };

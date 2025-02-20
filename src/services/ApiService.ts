@@ -53,14 +53,13 @@ class ApiService {
 			const response = await axios.post(url, parameters, { headers: headers });
 			return response.data;
 		} catch (error: any) {
-			this.handleError(error);
+			return this.handleError(error);
 		}
 	}
 
 	async callGetApi(url: string, headers: any = {}) {
 		try {
 			const accessToken = await this.getAccessToken();
-			console.log("accessToken :>> ", accessToken);
 
 			headers = {
 				...headers,
@@ -71,14 +70,14 @@ class ApiService {
 			const response = await axios.get(url, { headers: headers });
 			return response.data;
 		} catch (error: any) {
-			this.handleError(error);
+			return this.handleError(error);
 		}
 	}
 
 	async callPutApi(url: string, data?: any, headers: any = {}) {
 		try {
 			const accessToken = await this.getAccessToken();
-			console.log("accessToken :>> ", accessToken);
+
 			headers = {
 				...headers,
 				"Content-Type": "application/json",
@@ -87,7 +86,7 @@ class ApiService {
 			const response = await axios.put(url, data, { headers: headers });
 			return response.data;
 		} catch (error: any) {
-			this.handleError(error);
+			return this.handleError(error);
 		}
 	}
 
@@ -102,7 +101,7 @@ class ApiService {
 			const response = await axios.delete(url, { headers: headers });
 			return response.data;
 		} catch (error: any) {
-			this.handleError(error);
+			return this.handleError(error);
 		}
 	}
 }

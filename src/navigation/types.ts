@@ -9,6 +9,7 @@ export type MainStackParamList = {
 	Home: undefined;
 	AddTask: undefined;
 	TaskDetails: { taskId: string };
+	ChangePassword: undefined
 };
 
 export type AuthScreenProps<T extends keyof AuthStackParamList> =
