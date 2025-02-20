@@ -13,7 +13,7 @@ import { RootNavigator } from "./src/navigation";
 
 export default function App() {
 	useEffect(() => {
-		Appearance.setColorScheme("dark");
+		Appearance.setColorScheme("light");
 	}, []);
 
 	return (
