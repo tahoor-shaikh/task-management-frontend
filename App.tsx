@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { Appearance } from "react-native";
 import Toast from "react-native-toast-message";
 import { Provider as PaperProvider } from "react-native-paper";
 import { Provider as ReduxProvider } from "react-redux";
@@ -11,6 +12,10 @@ import { store, persistor } from "./src/store";
 import { RootNavigator } from "./src/navigation";
 
 export default function App() {
+	useEffect(() => {
+		Appearance.setColorScheme("dark");
+	}, []);
+
 	return (
 		<>
 			<ReduxProvider store={store}>

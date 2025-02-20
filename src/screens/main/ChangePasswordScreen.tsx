@@ -97,6 +97,7 @@ const styles = StyleSheet.create({
 		padding: 16,
 		justifyContent: "space-between",
 		marginTop: 16,
+		backgroundColor: "#fff",
 	},
 	centered: {
 		justifyContent: "center",
